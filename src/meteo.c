@@ -52,6 +52,10 @@
        vars->Temp_max[cpt] = Mnemo_create_AI ( agent, acronyme, "Température maximum", "°C", AGENT_ARCHIVE_1_HEURE );
        g_snprintf( acronyme, sizeof(acronyme), "DAY%d_PROBA_PLUIE", cpt );
        vars->Proba_pluie[cpt] = Mnemo_create_AI ( agent, acronyme, "Probabilité de pluie (0-100%)", "%", AGENT_ARCHIVE_1_HEURE );
+       g_snprintf( acronyme, sizeof(acronyme), "DAY%d_PROBA_PLUIE_MM", cpt );
+       vars->Proba_pluie_mm[cpt] = Mnemo_create_AI ( agent, acronyme, "Précipitations prévues (mm)", "mm", AGENT_ARCHIVE_1_HEURE );
+       g_snprintf( acronyme, sizeof(acronyme), "DAY%d_PROBA_PLUIE_MM_MAX", cpt );
+       vars->Proba_pluie_mm_max[cpt] = Mnemo_create_AI ( agent, acronyme, "Précipitations prévues maximum (mm)", "mm", AGENT_ARCHIVE_1_HEURE );
        g_snprintf( acronyme, sizeof(acronyme), "DAY%d_PROBA_GEL", cpt );
        vars->Proba_gel[cpt] = Mnemo_create_AI ( agent, acronyme, "Probabilité de gel (0-100%)", "%", AGENT_ARCHIVE_1_HEURE );
        g_snprintf( acronyme, sizeof(acronyme), "DAY%d_PROBA_BROUILLARD", cpt );
@@ -143,18 +147,20 @@
     Info( __func__, agent->agent_classe, agent->agent_tech_id, LOG_DEBUG, "day %02d -> temp_min=%02d, temp_max=%02d",
           day, Json_get_int ( element, "tmin" ), Json_get_int ( element, "tmax" ) );
 
-    Mqtt_Send_AI ( agent, vars->Weather[day],          1.0*Json_get_int ( element, "weather" ), TRUE );
-    Mqtt_Send_AI ( agent, vars->Temp_min[day],         1.0*Json_get_int ( element, "tmin" ), TRUE );
-    Mqtt_Send_AI ( agent, vars->Temp_max[day],         1.0*Json_get_int ( element, "tmax" ), TRUE );
-    Mqtt_Send_AI ( agent, vars->Proba_pluie[day],      1.0*Json_get_int ( element, "probarain" ), TRUE );
-    Mqtt_Send_AI ( agent, vars->Proba_gel[day],        1.0*Json_get_int ( element, "probafrost" ), TRUE );
-    Mqtt_Send_AI ( agent, vars->Proba_brouillard[day], 1.0*Json_get_int ( element, "probafog" ), TRUE );
-    Mqtt_Send_AI ( agent, vars->Proba_vent_70[day],    1.0*Json_get_int ( element, "probawind70" ), TRUE );
-    Mqtt_Send_AI ( agent, vars->Proba_vent_100[day],   1.0*Json_get_int ( element, "probawind100" ), TRUE );
-    Mqtt_Send_AI ( agent, vars->Proba_vent_orage[day], 1.0*Json_get_int ( element, "gustx" ), TRUE );
-    Mqtt_Send_AI ( agent, vars->Vent_10m[day],         1.0*Json_get_int ( element, "wind10m" ), TRUE );
-    Mqtt_Send_AI ( agent, vars->Direction_vent[day],   1.0*Json_get_int ( element, "dirwind10m" ), TRUE );
-    Mqtt_Send_AI ( agent, vars->Rafale_vent[day],      1.0*Json_get_int ( element, "gust10m" ), TRUE );
+    Mqtt_Send_AI ( agent, vars->Weather[day],            1.0*Json_get_int ( element, "weather" ), TRUE );
+    Mqtt_Send_AI ( agent, vars->Temp_min[day],           1.0*Json_get_int ( element, "tmin" ), TRUE );
+    Mqtt_Send_AI ( agent, vars->Temp_max[day],           1.0*Json_get_int ( element, "tmax" ), TRUE );
+    Mqtt_Send_AI ( agent, vars->Proba_pluie[day],        1.0*Json_get_int ( element, "probarain" ), TRUE );
+    Mqtt_Send_AI ( agent, vars->Proba_pluie_mm[day],     1.0*Json_get_int ( element, "rr10" ), TRUE );
+    Mqtt_Send_AI ( agent, vars->Proba_pluie_mm_max[day], 1.0*Json_get_int ( element, "rr1" ), TRUE );
+    Mqtt_Send_AI ( agent, vars->Proba_gel[day],          1.0*Json_get_int ( element, "probafrost" ), TRUE );
+    Mqtt_Send_AI ( agent, vars->Proba_brouillard[day],   1.0*Json_get_int ( element, "probafog" ), TRUE );
+    Mqtt_Send_AI ( agent, vars->Proba_vent_70[day],      1.0*Json_get_int ( element, "probawind70" ), TRUE );
+    Mqtt_Send_AI ( agent, vars->Proba_vent_100[day],     1.0*Json_get_int ( element, "probawind100" ), TRUE );
+    Mqtt_Send_AI ( agent, vars->Proba_vent_orage[day],   1.0*Json_get_int ( element, "gustx" ), TRUE );
+    Mqtt_Send_AI ( agent, vars->Vent_10m[day],           1.0*Json_get_int ( element, "wind10m" ), TRUE );
+    Mqtt_Send_AI ( agent, vars->Direction_vent[day],     1.0*Json_get_int ( element, "dirwind10m" ), TRUE );
+    Mqtt_Send_AI ( agent, vars->Rafale_vent[day],        1.0*Json_get_int ( element, "gust10m" ), TRUE );
   }
 /******************************************************************************************************************************/
 /* Meteo_get_forecast: Récupère les prévisions auprès de meteo-concept                                                        */

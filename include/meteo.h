@@ -43,6 +43,8 @@ struct ABLS_METEO_VARS {
   JsonNode *Temp_min[METEO_NBR_DAYS];
   JsonNode *Temp_max[METEO_NBR_DAYS];
   JsonNode *Proba_pluie[METEO_NBR_DAYS];
+  JsonNode *Proba_pluie_mm[METEO_NBR_DAYS];
+  JsonNode *Proba_pluie_mm_max[METEO_NBR_DAYS];
   JsonNode *Proba_gel[METEO_NBR_DAYS];
   JsonNode *Proba_brouillard[METEO_NBR_DAYS];
   JsonNode *Proba_vent_70[METEO_NBR_DAYS];
