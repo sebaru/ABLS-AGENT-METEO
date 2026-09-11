@@ -55,5 +55,8 @@ struct ABLS_METEO_VARS {
   JsonNode *Rafale_vent[METEO_NBR_DAYS];
 };
 
+extern struct ABLS_AGENT *Agent;
+extern struct ABLS_METEO_VARS *Agent_vars;
+
 #endif /* _ABLS_METEO_H_ */
 /*----------------------------------------------------------------------------------------------------------------------------*/
