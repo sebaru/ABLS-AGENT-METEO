@@ -31,6 +31,9 @@
 
  #include "meteo.h"
 
+ struct ABLS_AGENT *Agent = NULL;
+ struct ABLS_METEO_VARS *Agent_vars = NULL;
+
 /******************************************************************************************************************************/
 /* Meteo_create_mnemos: Cree les mnemoniques de l'agent                                                                       */
 /* Entrée: l'agent                                                                                                            */
@@ -202,46 +205,46 @@
  gint main ( gint argc, gchar *argv[] )
   { Config_add_parameter ( "token",      "TOKEN", "Token de l'API Météo-Concept", CONFIG_STRING );
     Config_add_parameter ( "code-insee", "INSEE", "Code INSEE de la commune",     CONFIG_STRING );
-    struct ABLS_AGENT *agent = Agent_init ( argv[0], "meteo", ABLS_AGENT_METEO_VERSION, sizeof(struct ABLS_METEO_VARS), argc, argv );
-    struct ABLS_METEO_VARS *vars = agent->vars;
+    Agent = Agent_init ( argv[0], "meteo", ABLS_AGENT_METEO_VERSION, sizeof(struct ABLS_METEO_VARS), argc, argv );
+    Agent_vars = Agent->vars;
 
-    if (!Agent_config_get_string ( agent, "token" ))
-     { Info( __func__, agent->agent_classe, agent->agent_tech_id, LOG_ERR, "ERROR: No token, stopping agent" );
-       Agent_end(agent);
+    if (!Agent_config_get_string ( Agent, "token" ))
+     { Info( __func__, Agent->agent_classe, Agent->agent_tech_id, LOG_ERR, "ERROR: No token, stopping Agent" );
+       Agent_end(Agent);
      }
 
-    if (!Agent_config_get_string ( agent, "code_insee" ))
-     { Info( __func__, agent->agent_classe, agent->agent_tech_id, LOG_ERR, "ERROR: No code_insee, stopping agent" );
-       Agent_end(agent);
+    if (!Agent_config_get_string ( Agent, "code_insee" ))
+     { Info( __func__, Agent->agent_classe, Agent->agent_tech_id, LOG_ERR, "ERROR: No code_insee, stopping Agent" );
+       Agent_end(Agent);
      }
 
-    Meteo_create_mnemos ( agent );
+    Meteo_create_mnemos ( Agent );
 
-    Agent_is_ready ( agent );
+    Agent_is_ready ( Agent );
 
-    while(agent->Agent_run == AGENT_IS_RUNNING)                                              /* On tourne tant que necessaire */
-     { Agent_loop ( agent );                                             /* Loop sur l'agent pour mettre a jour la telemetrie */
+    while(Agent->Agent_run == AGENT_IS_RUNNING)                                              /* On tourne tant que necessaire */
+     { Agent_loop ( Agent );                                             /* Loop sur l'Agent pour mettre a jour la telemetrie */
 /****************************************************** Ecoute du master ******************************************************/
        JsonNode *mqtt_local_message;
-       while ( (mqtt_local_message = Agent_get_mqtt_local_message ( agent ) ) != NULL )
+       while ( (mqtt_local_message = Agent_get_mqtt_local_message ( Agent ) ) != NULL )
         { Json_unref ( mqtt_local_message ); }
 /****************************************************** Ecoute de l'api *******************************************************/
        JsonNode *mqtt_api_message;
-       while ( (mqtt_api_message = Agent_get_mqtt_api_message ( agent ) ) != NULL )
+       while ( (mqtt_api_message = Agent_get_mqtt_api_message ( Agent ) ) != NULL )
         { Json_unref ( mqtt_api_message ); }
 /****************************************************** Interrogation du site *************************************************/
        time_t now = time(NULL);
-       if (now >= vars->next_request)
-        { gboolean ephemeride_ok = Meteo_get_ephemeride ( agent );
-          gboolean forecast_ok   = Meteo_get_forecast ( agent );
+       if (now >= Agent_vars->next_request)
+        { gboolean ephemeride_ok = Meteo_get_ephemeride ( Agent );
+          gboolean forecast_ok   = Meteo_get_forecast ( Agent );
           gboolean comm_ok       = (ephemeride_ok && forecast_ok);
 
-          Agent_send_comm_to_master ( agent, comm_ok );
-          Agent_set_status ( agent, "%s", (comm_ok ? "Prévisions à jour" : "Site meteo-concept injoignable") );
-          vars->next_request = now + (comm_ok ? METEO_POLLING_SEC : METEO_RETRY_SEC);        /* Polling adaptatif si erreur */
+          Agent_send_comm_to_master ( Agent, comm_ok );
+          Agent_set_status ( Agent, "%s", (comm_ok ? "Prévisions à jour" : "Site meteo-concept injoignable") );
+          Agent_vars->next_request = now + (comm_ok ? METEO_POLLING_SEC : METEO_RETRY_SEC);        /* Polling adaptatif si erreur */
         }
      }
 
-    Agent_end(agent);
+    Agent_end(Agent);
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/
