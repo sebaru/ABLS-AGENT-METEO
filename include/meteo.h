@@ -34,26 +34,26 @@
 #define METEO_POLLING_SEC    3600                                                          /* Interrogation nominale du site */
 #define METEO_RETRY_SEC      60                                             /* Interrogation accélérée si communication NOK */
 
-struct ABLS_METEO_VARS {
-  time_t next_request;
+ struct ABLS_METEO_VARS
+  { time_t next_request;
 
-  JsonNode *sunrise;
-  JsonNode *sunset;
-  JsonNode *Weather[METEO_NBR_DAYS];
-  JsonNode *Temp_min[METEO_NBR_DAYS];
-  JsonNode *Temp_max[METEO_NBR_DAYS];
-  JsonNode *Proba_pluie[METEO_NBR_DAYS];
-  JsonNode *Proba_pluie_mm[METEO_NBR_DAYS];
-  JsonNode *Proba_pluie_mm_max[METEO_NBR_DAYS];
-  JsonNode *Proba_gel[METEO_NBR_DAYS];
-  JsonNode *Proba_brouillard[METEO_NBR_DAYS];
-  JsonNode *Proba_vent_70[METEO_NBR_DAYS];
-  JsonNode *Proba_vent_100[METEO_NBR_DAYS];
-  JsonNode *Proba_vent_orage[METEO_NBR_DAYS];
-  JsonNode *Vent_10m[METEO_NBR_DAYS];
-  JsonNode *Direction_vent[METEO_NBR_DAYS];
-  JsonNode *Rafale_vent[METEO_NBR_DAYS];
-};
+    JsonNode *sunrise;
+    JsonNode *sunset;
+    JsonNode *Weather[METEO_NBR_DAYS];
+    JsonNode *Temp_min[METEO_NBR_DAYS];
+    JsonNode *Temp_max[METEO_NBR_DAYS];
+    JsonNode *Proba_pluie[METEO_NBR_DAYS];
+    JsonNode *Proba_pluie_mm[METEO_NBR_DAYS];
+    JsonNode *Proba_pluie_mm_max[METEO_NBR_DAYS];
+    JsonNode *Proba_gel[METEO_NBR_DAYS];
+    JsonNode *Proba_brouillard[METEO_NBR_DAYS];
+    JsonNode *Proba_vent_70[METEO_NBR_DAYS];
+    JsonNode *Proba_vent_100[METEO_NBR_DAYS];
+    JsonNode *Proba_vent_orage[METEO_NBR_DAYS];
+    JsonNode *Vent_10m[METEO_NBR_DAYS];
+    JsonNode *Direction_vent[METEO_NBR_DAYS];
+    JsonNode *Rafale_vent[METEO_NBR_DAYS];
+  };
 
 extern struct ABLS_AGENT *Agent;
 extern struct ABLS_METEO_VARS *Agent_vars;

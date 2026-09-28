@@ -240,7 +240,6 @@
           gboolean comm_ok       = (ephemeride_ok && forecast_ok);
 
           Agent_send_comm_to_master ( Agent, comm_ok );
-          Agent_set_status ( Agent, "%s", (comm_ok ? "Prévisions à jour" : "Site meteo-concept injoignable") );
           Agent_vars->next_request = now + (comm_ok ? METEO_POLLING_SEC : METEO_RETRY_SEC);        /* Polling adaptatif si erreur */
         }
      }
