@@ -40,7 +40,7 @@
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
  static void Meteo_create_mnemos ( struct ABLS_AGENT *agent )
-  { struct ABLS_METEO_VARS *vars = agent->vars;
+  { struct ABLS_METEO_VARS *vars = Agent_get_vars ( agent );
 
     vars->sunrise = Mnemo_create_HORLOGE ( agent, "SUNRISE", "Horloge du levé du soleil" );
     vars->sunset  = Mnemo_create_HORLOGE ( agent, "SUNSET",  "Horloge du couché du soleil" );
@@ -83,31 +83,31 @@
 /* Sortie: TRUE si la requete a abouti                                                                                        */
 /******************************************************************************************************************************/
  static gboolean Meteo_get_ephemeride ( struct ABLS_AGENT *agent )
-  { struct ABLS_METEO_VARS *vars = agent->vars;
+  { struct ABLS_METEO_VARS *vars = Agent_get_vars ( agent );
     gchar *token      = Agent_config_get_string ( agent, "token" );
     gchar *code_insee = Agent_config_get_string ( agent, "code_insee" );
 
     gchar *query = g_strdup_printf ( "https://api.meteo-concept.com/api/ephemeride/0?token=%s&insee=%s", token, code_insee );
-    if (!query) { Info( __func__, agent->agent_classe, agent->agent_tech_id, LOG_ALERT, "Memory Error" ); return(FALSE); }
+    if (!query) { Info( __func__, Agent_get_classe ( agent ), Agent_get_tech_id ( agent ), LOG_ALERT, "Memory Error" ); return(FALSE); }
 
-    Info( __func__, agent->agent_classe, agent->agent_tech_id, LOG_DEBUG, "Start getting ephemeride for code_insee '%s'", code_insee );
+    Info( __func__, Agent_get_classe ( agent ), Agent_get_tech_id ( agent ), LOG_DEBUG, "Start getting ephemeride for code_insee '%s'", code_insee );
 
     JsonNode *response = Http_Get_external ( agent, query );
     g_free(query);
     if (!response)
-     { Info( __func__, agent->agent_classe, agent->agent_tech_id, LOG_ERR, "Ephemeride: no response" );
+     { Info( __func__, Agent_get_classe ( agent ), Agent_get_tech_id ( agent ), LOG_ERR, "Ephemeride: no response" );
        return(FALSE);
      }
 
     gboolean retour   = FALSE;
     gint http_code    = Json_get_int ( response, "http_code" );
     if (http_code != 200)
-     { Info( __func__, agent->agent_classe, agent->agent_tech_id, LOG_ERR, "Ephemeride: status %d", http_code ); }
+     { Info( __func__, Agent_get_classe ( agent ), Agent_get_tech_id ( agent ), LOG_ERR, "Ephemeride: status %d", http_code ); }
     else
      { JsonNode *city       = Json_get_object_as_node ( response, "city" );
        JsonNode *ephemeride = Json_get_object_as_node ( response, "ephemeride" );
        if (!ephemeride)
-        { Info( __func__, agent->agent_classe, agent->agent_tech_id, LOG_ERR, "Ephemeride: no 'ephemeride' in response" ); }
+        { Info( __func__, Agent_get_classe ( agent ), Agent_get_tech_id ( agent ), LOG_ERR, "Ephemeride: no 'ephemeride' in response" ); }
        else
         { gchar *city_name = (city ? Json_get_string ( city, "name" ) : NULL);
           gchar *sunrise   = Json_get_string ( ephemeride, "sunrise" );
@@ -115,13 +115,13 @@
           gint heure, minute;
 
           if ( sunrise && sscanf ( sunrise, "%d:%d", &heure, &minute ) == 2)
-           { Info( __func__, agent->agent_classe, agent->agent_tech_id, LOG_INFO, "%s -> sunrise at %02d:%02d",
+           { Info( __func__, Agent_get_classe ( agent ), Agent_get_tech_id ( agent ), LOG_INFO, "%s -> sunrise at %02d:%02d",
                    (city_name ? city_name : "?"), heure, minute );
              Mnemo_delete_HORLOGE_tick ( agent, vars->sunrise );
              Mnemo_create_HORLOGE_tick ( agent, vars->sunrise, heure, minute );
            }
           if ( sunset && sscanf ( sunset, "%d:%d", &heure, &minute ) == 2)
-           { Info( __func__, agent->agent_classe, agent->agent_tech_id, LOG_INFO, "%s ->  sunset at %02d:%02d",
+           { Info( __func__, Agent_get_classe ( agent ), Agent_get_tech_id ( agent ), LOG_INFO, "%s ->  sunset at %02d:%02d",
                    (city_name ? city_name : "?"), heure, minute );
              Mnemo_delete_HORLOGE_tick ( agent, vars->sunset );
              Mnemo_create_HORLOGE_tick ( agent, vars->sunset, heure, minute );
@@ -139,15 +139,15 @@
 /******************************************************************************************************************************/
  static void Meteo_update_forecast ( JsonArray *array, guint index_, JsonNode *element, gpointer user_data )
   { struct ABLS_AGENT *agent = user_data;
-    struct ABLS_METEO_VARS *vars = agent->vars;
+    struct ABLS_METEO_VARS *vars = Agent_get_vars ( agent );
 
     gint day = Json_get_int ( element, "day" );
     if (day < 0 || day >= METEO_NBR_DAYS)
-     { Info( __func__, agent->agent_classe, agent->agent_tech_id, LOG_WARNING, "Forecast: day %d out of range, discarding", day );
+     { Info( __func__, Agent_get_classe ( agent ), Agent_get_tech_id ( agent ), LOG_WARNING, "Forecast: day %d out of range, discarding", day );
        return;
      }
 
-    Info( __func__, agent->agent_classe, agent->agent_tech_id, LOG_DEBUG, "day %02d -> temp_min=%02d, temp_max=%02d",
+    Info( __func__, Agent_get_classe ( agent ), Agent_get_tech_id ( agent ), LOG_DEBUG, "day %02d -> temp_min=%02d, temp_max=%02d",
           day, Json_get_int ( element, "tmin" ), Json_get_int ( element, "tmax" ) );
 
     Mqtt_Send_AI ( agent, vars->Weather[day],            1.0*Json_get_int ( element, "weather" ), TRUE );
@@ -175,21 +175,21 @@
     gchar *code_insee = Agent_config_get_string ( agent, "code_insee" );
 
     gchar *query = g_strdup_printf ( "https://api.meteo-concept.com/api/forecast/daily?token=%s&insee=%s", token, code_insee );
-    if (!query) { Info( __func__, agent->agent_classe, agent->agent_tech_id, LOG_ALERT, "Memory Error" ); return(FALSE); }
+    if (!query) { Info( __func__, Agent_get_classe ( agent ), Agent_get_tech_id ( agent ), LOG_ALERT, "Memory Error" ); return(FALSE); }
 
-    Info( __func__, agent->agent_classe, agent->agent_tech_id, LOG_DEBUG, "Start getting forecast for code_insee '%s'", code_insee );
+    Info( __func__, Agent_get_classe ( agent ), Agent_get_tech_id ( agent ), LOG_DEBUG, "Start getting forecast for code_insee '%s'", code_insee );
 
     JsonNode *response = Http_Get_external ( agent, query );
     g_free(query);
     if (!response)
-     { Info( __func__, agent->agent_classe, agent->agent_tech_id, LOG_ERR, "Forecast: no response" );
+     { Info( __func__, Agent_get_classe ( agent ), Agent_get_tech_id ( agent ), LOG_ERR, "Forecast: no response" );
        return(FALSE);
      }
 
     gboolean retour  = FALSE;
     gint http_code   = Json_get_int ( response, "http_code" );
     if (http_code != 200)
-     { Info( __func__, agent->agent_classe, agent->agent_tech_id, LOG_ERR, "Forecast: status %d", http_code ); }
+     { Info( __func__, Agent_get_classe ( agent ), Agent_get_tech_id ( agent ), LOG_ERR, "Forecast: status %d", http_code ); }
     else
      { Json_foreach_array_element ( response, "forecast", Meteo_update_forecast, agent );
        retour = TRUE;
@@ -206,15 +206,15 @@
   { Config_add_parameter ( "token",      "TOKEN", "Token de l'API Météo-Concept", CONFIG_STRING );
     Config_add_parameter ( "code-insee", "INSEE", "Code INSEE de la commune",     CONFIG_STRING );
     Agent = Agent_init ( argv[0], "meteo", ABLS_AGENT_METEO_VERSION, sizeof(struct ABLS_METEO_VARS), argc, argv );
-    Agent_vars = Agent->vars;
+    Agent_vars = Agent_get_vars ( Agent );
 
     if (!Agent_config_get_string ( Agent, "token" ))
-     { Info( __func__, Agent->agent_classe, Agent->agent_tech_id, LOG_ERR, "ERROR: No token, stopping Agent" );
+     { Info( __func__, Agent_get_classe ( Agent ), Agent_get_tech_id ( Agent ), LOG_ERR, "ERROR: No token, stopping Agent" );
        Agent_end(Agent);
      }
 
     if (!Agent_config_get_string ( Agent, "code_insee" ))
-     { Info( __func__, Agent->agent_classe, Agent->agent_tech_id, LOG_ERR, "ERROR: No code_insee, stopping Agent" );
+     { Info( __func__, Agent_get_classe ( Agent ), Agent_get_tech_id ( Agent ), LOG_ERR, "ERROR: No code_insee, stopping Agent" );
        Agent_end(Agent);
      }
 
@@ -222,7 +222,7 @@
 
     Agent_is_ready ( Agent );
 
-    while(Agent->Agent_run == AGENT_IS_RUNNING)                                              /* On tourne tant que necessaire */
+    while(Agent_is_running ( Agent ))                                              /* On tourne tant que necessaire */
      { Agent_loop ( Agent );                                             /* Loop sur l'Agent pour mettre a jour la telemetrie */
 /****************************************************** Ecoute du master ******************************************************/
        JsonNode *mqtt_local_message;
@@ -240,7 +240,6 @@
           gboolean comm_ok       = (ephemeride_ok && forecast_ok);
 
           Agent_send_comm_to_master ( Agent, comm_ok );
-          Agent_set_status ( Agent, "%s", (comm_ok ? "Prévisions à jour" : "Site meteo-concept injoignable") );
           Agent_vars->next_request = now + (comm_ok ? METEO_POLLING_SEC : METEO_RETRY_SEC);        /* Polling adaptatif si erreur */
         }
      }
